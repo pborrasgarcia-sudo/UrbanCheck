@@ -6,6 +6,7 @@ const artistPhrases = {
     'Mor, ¿eres un verdadero fan?',
     '¿Realmente conoces al FERXXO?',
     'Mientras lo haces, ¿Feid o Ferxxo?',
+    'Que chimba morrr',
     '¿Eres un verdadero fan del FERXXO?'
   ],
   'Bad Bunny': [
@@ -19,16 +20,15 @@ const artistPhrases = {
     '¿Cuánto sabes de nuestra fruta favorita?',
     '¿Eres un fan real o solo te sabes Memorias?'
   ],
-  'Quevedo':[
+  'Quevedo': [
     '¿Qué tan fan eres del baifo?',
     '¿Cuánto sabes de Quevedo?',
     '¿Te consideras el mayor fan de Quevedo?'
   ],
-  'Myke Towers':[
+  'Myke Towers': [
     '¿Qué tan fan eres de la pantera negra?',
     '¿Cuánto sabes de Myke Towers?',
     '¿Eres de los mayores fans de Myke?'
-
   ]
 }
 
@@ -36,8 +36,8 @@ const artistImages = {
   'Feid': '/feid.jpg',
   'Bad Bunny': '/badbunny.jpg',
   'Mora': '/mora.jpg',
-  'Quevedo':'/quevedo.jpg',
-  'Myke Towers':'myketowers.jpg'
+  'Quevedo': '/quevedo.jpg',
+  'Myke Towers': '/myketowers.jpg'
 }
 
 function Game({ artist, mode, nickname, onGameOver, onBack }) {
@@ -72,7 +72,7 @@ function Game({ artist, mode, nickname, onGameOver, onBack }) {
       const { data, error } = await supabase
         .from('canciones')
         .select('*')
-        .ilike('Artista', `%${artist.name}%`)
+        .or(`"Artista".eq."${artist.name}","Artista".ilike."${artist.name} &%","Artista".ilike."${artist.name},%"`)
       if (error) { console.error('Error:', error); return }
       const conId = data.filter(c => c.Deezer_ID && c.Deezer_ID !== 'null')
       setCanciones(conId)
@@ -109,22 +109,27 @@ function Game({ artist, mode, nickname, onGameOver, onBack }) {
     const disponibles = lista.filter(c => !yaUsadas.includes(c.id))
     if (disponibles.length === 0) { onGameOver(rachaRef.current, null); return }
     const random = disponibles[Math.floor(Math.random() * disponibles.length)]
+    const idEsperado = random.id
     cancionActualRef.current = random
     setCancionActual(random)
     setInput('')
     setSugerencias([])
     setFeedback(null)
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.src = ''
+    }
     try {
       const res = await fetch(`http://localhost:3001/preview/${random.Deezer_ID}`)
       const trackData = await res.json()
-      if (trackData.preview && audioRef.current) {
+      if (trackData.preview && audioRef.current && cancionActualRef.current?.id === idEsperado) {
         audioRef.current.src = trackData.preview
         try {
           await audioRef.current.play()
         } catch (playErr) {
           console.warn('Autoplay bloqueado:', playErr)
         }
-      } else {
+      } else if (!trackData.preview) {
         const nuevasUsadas = [...yaUsadas, random.id]
         usadasRef.current = nuevasUsadas
         setUsadas(nuevasUsadas)
@@ -139,11 +144,17 @@ function Game({ artist, mode, nickname, onGameOver, onBack }) {
     }
   }
 
+  function normalizar(texto) {
+    return texto.toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+  }
+
   function handleInput(valor) {
     setInput(valor)
     if (valor.length >= 1) {
       const filtradas = canciones.filter(c =>
-        c.Cancion.toLowerCase().includes(valor.toLowerCase())
+        normalizar(c.Cancion).includes(normalizar(valor))
       )
       setSugerencias(filtradas.slice(0, 6))
     } else {
@@ -155,7 +166,7 @@ function Game({ artist, mode, nickname, onGameOver, onBack }) {
     setInput(cancion.Cancion)
     setSugerencias([])
     if (
-      cancion.Cancion.toLowerCase().trim() === cancionActualRef.current.Cancion.toLowerCase().trim() ||
+      normalizar(cancion.Cancion).trim() === normalizar(cancionActualRef.current.Cancion).trim() ||
       cancion.Deezer_ID === cancionActualRef.current.Deezer_ID
     ) {
       setFeedback('correct')
@@ -169,7 +180,7 @@ function Game({ artist, mode, nickname, onGameOver, onBack }) {
       const nuevasUsadas = [...usadasRef.current, cancionActualRef.current.id]
       usadasRef.current = nuevasUsadas
       setUsadas(nuevasUsadas)
-      setTimeout(() => siguienteCancion(cancionesRef.current, nuevasUsadas), 1000)
+      setTimeout(() => siguienteCancion(cancionesRef.current, nuevasUsadas), 1500)
     } else {
       handleFallo()
     }
@@ -191,7 +202,7 @@ function Game({ artist, mode, nickname, onGameOver, onBack }) {
     const nuevasUsadas = [...usadasRef.current, cancionActualRef.current.id]
     usadasRef.current = nuevasUsadas
     setUsadas(nuevasUsadas)
-    setTimeout(() => siguienteCancion(cancionesRef.current, nuevasUsadas), 1000)
+    setTimeout(() => siguienteCancion(cancionesRef.current, nuevasUsadas), 1500)
   }
 
   if (!cancionActual) return (
@@ -376,7 +387,8 @@ function Game({ artist, mode, nickname, onGameOver, onBack }) {
           border: '1px solid var(--border)',
           borderRadius: '12px',
           padding: '12px 24px',
-          textAlign: 'center'
+          textAlign: 'center',
+          width: '120px'
         }}>
           <p style={{ color: 'var(--text-muted)', fontSize: '11px', letterSpacing: '2px', textTransform: 'uppercase' }}>Racha</p>
           <p style={{ fontSize: '28px', fontWeight: '800', color: 'var(--green)' }}>{racha}</p>
@@ -389,14 +401,16 @@ function Game({ artist, mode, nickname, onGameOver, onBack }) {
           padding: '12px 24px',
           textAlign: 'center',
           transition: 'border-color 0.3s',
-          position: 'relative'
+          width: '120px'
         }}>
           <p style={{ color: 'var(--text-muted)', fontSize: '11px', letterSpacing: '2px', textTransform: 'uppercase' }}>Tiempo</p>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <p style={{ fontSize: '28px', fontWeight: '800', color: tiempoColor, transition: 'color 0.3s' }}>{tiempoTotal}s</p>
             {showPenalty && (
               <span style={{
-                fontSize: '16px',
+                position: 'absolute',
+                right: '-28px',
+                fontSize: '14px',
                 fontWeight: '800',
                 color: '#ff4444',
                 animation: 'fadeUp 1s ease forwards'
@@ -404,7 +418,9 @@ function Game({ artist, mode, nickname, onGameOver, onBack }) {
             )}
             {showBonus && (
               <span style={{
-                fontSize: '16px',
+                position: 'absolute',
+                right: '-28px',
+                fontSize: '14px',
                 fontWeight: '800',
                 color: 'var(--green)',
                 animation: 'fadeUp 1s ease forwards'

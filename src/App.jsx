@@ -53,17 +53,15 @@ function App() {
   }
 
   const handleModeSelect = (selectedMode) => {
-    setMode(selectedMode)
-    // Si no está logueado, ir a nickname temporal
-    // Si está logueado, ir directo al juego
-    if (user && username) {
-      setScreen('game')
-    } else if (!user) {
-      setScreen('nickname')
-    } else {
-      setScreen('username-setup')
-    }
+  setMode(selectedMode)
+  if (user && username) {
+    setScreen('game')
+  } else if (!user) {
+    setScreen('game')
+  } else {
+    setScreen('username-setup')
   }
+}
 
   const handleGameOver = (score, ultimaCancion) => {
   setFinalScore(score)
@@ -134,7 +132,7 @@ function App() {
         <Game
           artist={artist}
           mode={mode}
-          nickname={username || 'Anónimo'}
+          nickname={username || ''}
           onGameOver={handleGameOver}
           onBack={() => setScreen('mode')}
         />
