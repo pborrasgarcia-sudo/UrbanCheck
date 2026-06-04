@@ -120,7 +120,7 @@ function Game({ artist, mode, nickname, onGameOver, onBack }) {
       audioRef.current.src = ''
     }
     try {
-      const res = await fetch(`http://localhost:3001/preview/${random.Deezer_ID}`)
+      const res = await fetch(`/api/preview?id=${random.Deezer_ID}`)
       const trackData = await res.json()
       if (trackData.preview && audioRef.current && cancionActualRef.current?.id === idEsperado) {
         audioRef.current.src = trackData.preview
