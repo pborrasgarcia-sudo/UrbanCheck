@@ -130,13 +130,14 @@ function ArtistSelector({ onSelect, onBack }) {
         Demuestra que eres fan de verdad
       </p>
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
-        gap: '16px',
-        maxWidth: '700px',
-        width: '100%'
-      }}>
+     <div style={{
+  display: 'grid',
+  gridTemplateColumns: 'repeat(2, 1fr)',
+  gap: '16px',
+  maxWidth: '500px',
+  width: '100%',
+  padding: '0 16px'
+}}>
         {artists.map(artist => (
           <div
             key={artist.id || artist.name}
