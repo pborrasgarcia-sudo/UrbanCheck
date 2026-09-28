@@ -98,12 +98,12 @@ function ArtistSelector({ onSelect, onBack }) {
   const [screen, setScreen] = useState('games')
 
   const artists = [
-    { id: 1166311, name: 'Bad Bunny', platform: 'deezer', image: '/badbunny.jpg' },
-    { id: 10583405, name: 'Feid', platform: 'deezer', image: '/feid.jpg' },
+    { id: 1166311, name: 'Feid', platform: 'deezer', image: '/feid.jpg' },
+    { id: 10583405, name: 'Bad Bunny', platform: 'deezer', image: '/badbunny.jpg' },
     { id: 3922661, name: 'Mora', platform: 'deezer', image: '/mora.jpg' },
-    { id: 6705223, name: 'Quevedo', platform: 'deezer', image: '/quevedo.jpg'},
-    { id: 12029862, name: 'Myke Towers', platform: 'deezer', image: '/myketowers.jpg'}
-]
+    { id: 0, name: 'Quevedo', platform: 'deezer', image: '/quevedo.jpg' },
+    { id: 0, name: 'Myke Towers', platform: 'deezer', image: '/myketowers.jpg' }
+  ]
 
   if (screen === 'games') {
     return <GameSelector onSelect={() => setScreen('artists')} onBack={onBack} />
@@ -126,14 +126,20 @@ function ArtistSelector({ onSelect, onBack }) {
       <h1 style={{ fontSize: '42px', fontWeight: '800', marginBottom: '8px' }}>
         Elige un artista
       </h1>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '60px', fontSize: '16px' }}>
-        Demuestra que eres un fan de verdad
+      <p style={{ color: 'var(--text-muted)', marginBottom: '40px', fontSize: '16px' }}>
+        Demuestra que eres fan de verdad
       </p>
 
-     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 200px)', gap: '24px', justifyContent: 'center' }}>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+        gap: '16px',
+        maxWidth: '700px',
+        width: '100%'
+      }}>
         {artists.map(artist => (
           <div
-            key={artist.id}
+            key={artist.id || artist.name}
             onClick={() => onSelect(artist)}
             style={{
               cursor: 'pointer',
@@ -141,7 +147,6 @@ function ArtistSelector({ onSelect, onBack }) {
               border: '1px solid var(--border)',
               borderRadius: '16px',
               overflow: 'hidden',
-              width: '200px',
               transition: 'all 0.2s ease'
             }}
             onMouseEnter={e => {
@@ -158,11 +163,11 @@ function ArtistSelector({ onSelect, onBack }) {
             <img
               src={artist.image}
               alt={artist.name}
-              style={{ width: '100%', height: '200px', objectFit: 'cover', display: 'block' }}
+              style={{ width: '100%', height: '150px', objectFit: 'cover', display: 'block' }}
             />
-            <div style={{ padding: '16px' }}>
-              <p style={{ fontWeight: '700', fontSize: '18px' }}>{artist.name}</p>
-              <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '4px' }}>Urban / Reggaeton</p>
+            <div style={{ padding: '12px' }}>
+              <p style={{ fontWeight: '700', fontSize: '15px' }}>{artist.name}</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '12px', marginTop: '4px' }}>Urban / Reggaeton</p>
             </div>
           </div>
         ))}
