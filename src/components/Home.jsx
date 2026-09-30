@@ -73,7 +73,7 @@ function Home({ onPlay, user, username, onLogin, onLogout }) {
           letterSpacing: '-2px',
           color: 'var(--green)'
         }}>
-          Check
+          Found
         </h1>
 
         <p style={{
